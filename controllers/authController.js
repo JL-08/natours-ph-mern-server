@@ -76,16 +76,24 @@ exports.protect = catchAsync(async (req, res, next) => {
       .status(400)
       .json({ message: 'You are not logged in. Please login to get access.' });
 
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  console.log('decoded', decoded);
+  const isCustomAuth = token.length < 500;
 
-  const currentUser = await User.findById(decoded.id);
+  if (!isCustomAuth) {
+    const decoded = jwt.decode(token);
+    console.log(decoded);
+    req.userId = decoded.sub;
+  } else {
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  if (!currentUser)
-    return res
-      .status(400)
-      .json({ message: 'The token belonging to this user no longer exists.' });
+    const currentUser = await User.findById(decoded.id);
 
-  req.user = currentUser;
+    if (!currentUser)
+      return res
+        .status(400)
+        .json({
+          message: 'The token belonging to this user no longer exists.',
+        });
+    req.user = currentUser;
+  }
   next();
 });
