@@ -12,7 +12,7 @@ router
 router
   .route('/:id')
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
+  .patch(authController.protect, tourController.updateTour)
+  .delete(authController.protect, tourController.deleteTour);
 
 module.exports = router;
