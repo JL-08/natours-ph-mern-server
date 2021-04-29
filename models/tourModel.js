@@ -11,7 +11,6 @@ const tourSchema = new mongoose.Schema(
       trim: true,
       maxLength: [40, 'A tour name must contain 10 to 40 characters'],
       minLength: [10, 'A tour name must contain 10 to 40 characters'],
-      validate: [validator.isAlpha, 'A tour name must only contain letters'],
     },
     slug: String,
     duration: {
@@ -25,6 +24,7 @@ const tourSchema = new mongoose.Schema(
     activities: [
       {
         type: String,
+        required: [true, 'A tour must have an activity'],
         enum: {
           values: ['Biking', 'Hiking', 'Swimming', 'Sightseeing'],
           message:
@@ -75,7 +75,10 @@ const tourSchema = new mongoose.Schema(
       default: Date.now(),
       select: false,
     },
-    startDates: [Date],
+    startDates: {
+      type: [Date],
+      required: [true, 'A tour must have a date'],
+    },
     secretTour: {
       type: Boolean,
       default: false,

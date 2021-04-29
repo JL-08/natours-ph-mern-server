@@ -58,16 +58,12 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-// exports.test = (req, res, next) => {
-//   res.status(200).json({ message: 'works' });
-// };
-
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
 
   if (
     req.headers.authorization &&
-    req.headers.authorization.startsWith('bearer')
+    req.headers.authorization.startsWith('Bearer')
   )
     token = req.headers.authorization.split(' ')[1];
 
@@ -88,11 +84,9 @@ exports.protect = catchAsync(async (req, res, next) => {
     const currentUser = await User.findById(decoded.id);
 
     if (!currentUser)
-      return res
-        .status(400)
-        .json({
-          message: 'The token belonging to this user no longer exists.',
-        });
+      return res.status(400).json({
+        message: 'The token belonging to this user no longer exists.',
+      });
     req.user = currentUser;
   }
   next();
