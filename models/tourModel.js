@@ -84,14 +84,13 @@ const tourSchema = new mongoose.Schema(
       default: false,
     },
     mainLocation: {
+      name: String,
       type: {
         type: String,
         default: 'Point',
         enum: ['Point'],
       },
       coordinates: [Number],
-      address: String,
-      description: String,
     },
     locations: [
       {
@@ -112,6 +111,10 @@ const tourSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
