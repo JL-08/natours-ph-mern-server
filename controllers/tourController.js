@@ -13,6 +13,10 @@ exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
 
+exports.getUpcomingTours = factory.getAll(Tour, {
+  path: 'upcoming',
+});
+
 exports.getToursWithin = catchAsync(async (req, res, next) => {
   const { distance, latlng, unit } = req.params;
 
