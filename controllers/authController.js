@@ -5,7 +5,7 @@ const { promisify } = require('util');
 
 const User = require('../models/userModel');
 
-const createSendToken = (user, statusCode, res) => {
+const generateJwtToken = (user) => {
   const token = jwt.sign(
     { email: user.email, id: user._id },
     process.env.JWT_SECRET,
@@ -14,13 +14,7 @@ const createSendToken = (user, statusCode, res) => {
     }
   );
 
-  res.status(statusCode).json({
-    status: 'success',
-    token,
-    data: {
-      user,
-    },
-  });
+  return token;
 };
 
 exports.register = catchAsync(async (req, res, next) => {
@@ -37,7 +31,15 @@ exports.register = catchAsync(async (req, res, next) => {
 
   const newUser = await User.create(req.body);
 
-  createSendToken(newUser, 201, res);
+  const token = generateJwtToken(newUser);
+
+  res.status(201).json({
+    status: 'success',
+    token,
+    data: {
+      newUser,
+    },
+  });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -55,7 +57,15 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!isPasswordCorrect)
     return res.status(400).json({ message: 'Invalid credentials' });
 
-  createSendToken(user, 200, res);
+  const token = generateJwtToken(user);
+
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -76,7 +86,6 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!isCustomAuth) {
     const decoded = jwt.decode(token);
-    console.log(decoded);
     req.userId = decoded.sub;
   } else {
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -91,3 +100,9 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
   next();
 });
+
+exports.getRefreshToken = catchAsync(async (req, res, next) => {});
+
+exports.createRefreshToken = catchAsync(async (req, res, next) => {});
+
+exports.revokeRefreshToken = catchAsync(async (req, res, next) => {});
