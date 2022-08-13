@@ -5,14 +5,22 @@ const router = express.Router();
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
-router
-  .route('/refresh-token')
-  .post(authController.protect, authController.createRefreshToken);
-router
-  .route('/revoke-refresh-token')
-  .post(authController.protect, authController.revokeRefreshToken);
-router
-  .route('/:id/refresh-token')
-  .get(authController.protect, authController.getRefreshToken);
+router.post('/token', authController.createToken);
+
+// router.post(
+//   '/refresh-token',
+//   authController.protect,
+//   authController.createRefreshToken
+// );
+router.post(
+  '/revoke-refresh-token',
+  authController.protect,
+  authController.revokeRefreshToken
+);
+router.get(
+  '/:id/refresh-token',
+  authController.protect,
+  authController.getRefreshToken
+);
 
 module.exports = router;
