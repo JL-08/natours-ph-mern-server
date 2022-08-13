@@ -8,7 +8,7 @@ const refreshTokenSchema = mongoose.Schema(
       ref: 'User',
     },
     token: String,
-    expires: Date,
+    expiresAt: Date,
     createdAt: {
       type: Date,
       default: Date.now(),
