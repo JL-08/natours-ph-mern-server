@@ -15,7 +15,7 @@ const bookingRouter = require('./routes/bookingRoutes');
 const app = express();
 
 // GLOBAL MIDDLEWARES
-app.use(cors());
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(cookieParser());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
