@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
-router.post('/token', authController.createToken);
+router.get('/token', authController.createToken);
 
 // router.post(
 //   '/refresh-token',

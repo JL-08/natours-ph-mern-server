@@ -88,7 +88,7 @@ exports.register = catchAsync(async (req, res, next) => {
     const token = generateJwtToken(newUser);
     const refreshToken = await createRefreshToken(req, newUser, session);
 
-    setTokenCookie(res, refreshToken.token, refreshToken.expiresAt);
+    await setTokenCookie(res, refreshToken.token, refreshToken.expiresAt);
 
     await session.commitTransaction();
 
@@ -109,7 +109,7 @@ exports.register = catchAsync(async (req, res, next) => {
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log('Cookies: ', req.cookies);
+
   if (!email || !password)
     return res
       .status(400)
@@ -117,13 +117,16 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email }).select('+password');
 
+  if (!user)
+    return res.status(400).json({ message: 'This user does not exist.' });
+
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
   if (!isPasswordCorrect)
-    return res.status(400).json({ message: 'Invalid credentials' });
+    return res.status(400).json({ message: 'Invalid credentials.' });
 
   const token = generateJwtToken(user);
-  const refreshToken = createRefreshToken(req, user, null);
+  const refreshToken = await createRefreshToken(req, user, null);
 
   setTokenCookie(res, refreshToken.token, refreshToken.expiresAt);
 
@@ -146,8 +149,6 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   )
     token = req.headers.authorization.split(' ')[1];
-
-  console.log('Cookies: ', req.cookies);
 
   if (!token && refreshToken)
     return res
@@ -185,6 +186,17 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.createToken = async (req, res) => {
   const { refreshToken } = req?.cookies;
 
+  let isTokenExist;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  )
+    isTokenExist = req.headers.authorization.split(' ')[1];
+
+  if (isTokenExist)
+    return res.status(204).json({ message: 'Already have an access token.' });
+
   if (!refreshToken)
     return res
       .status(401)
@@ -212,6 +224,7 @@ exports.createToken = async (req, res) => {
   res.status(200).json({
     status: 'success',
     data: {
+      user: currentUser,
       token,
     },
   });
