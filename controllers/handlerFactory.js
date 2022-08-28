@@ -2,11 +2,13 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
 
+const moment = require('moment');
+
 exports.getAll = (Model, option = {}) =>
   catchAsync(async (req, res, next) => {
-    if (option.path === 'upcoming') {
-      const currentDate = new Date().toISOString();
-      var filter = { 'startDates.0': { $gte: currentDate } };
+    let filter = {};
+    if (option?.path) {
+      filter = constructFilter(option.path, req, next);
     }
 
     const features = new APIFeatures(Model.find(filter), req.query)
@@ -59,3 +61,43 @@ exports.deleteOne = (Model) =>
 
     res.status(200).json({ status: 'success' });
   });
+
+const constructFilter = (path, req, next) => {
+  switch (path) {
+    case 'upcoming':
+      const currentDate = new Date().toISOString();
+      return {
+        'startDates.0': {
+          $gte: currentDate,
+          $lte: moment(currentDate).add(3, 'months'),
+        },
+      };
+
+    case 'tours-within':
+      const { distance, latlng, unit } = req.params;
+
+      const [lat, lng] = latlng.split(',');
+
+      const earthRadiusInMiles = 3963.2;
+      const earthRadiusInKm = 6378.1;
+      const radians =
+        unit === 'mi'
+          ? distance / earthRadiusInMiles
+          : distance / earthRadiusInKm;
+
+      if (!lat || !lng) {
+        return next(
+          new AppError(
+            'Please provide latitude and longitude in the format lat,lng.'
+          )
+        );
+      }
+
+      return {
+        mainLocation: { $geoWithin: { $centerSphere: [[lng, lat], radians] } },
+      };
+
+    default:
+      return;
+  }
+};
