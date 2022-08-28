@@ -21,6 +21,13 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A tour must have a maximum group size'],
     },
+    difficulty: {
+      type: String,
+      enum: {
+        values: ['Easy', 'Medium', 'Hard'],
+        message: 'Difficulty is either: Easy, Medium, Hard',
+      },
+    },
     activities: [
       {
         type: String,
