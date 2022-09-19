@@ -11,7 +11,12 @@ exports.getAll = (Model, option = {}) =>
       filter = constructFilter(option.path, req, next);
     }
 
-    const features = new APIFeatures(Model.find(filter), req.query)
+    let ref = option?.ref || '';
+
+    const features = new APIFeatures(
+      Model.find(filter).populate(ref),
+      req.query
+    )
       .filter()
       .sort()
       .limitFields()
@@ -24,9 +29,11 @@ exports.getAll = (Model, option = {}) =>
       .json({ status: 'success', results: docs.length, data: docs });
   });
 
-exports.getOne = (Model) =>
+exports.getOne = (Model, option = {}) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findById(req.params.id);
+    let ref = option?.ref || '';
+
+    const doc = await Model.findById(req.params.id).populate(ref);
 
     if (!doc) return next(new AppError('No document with that ID exists', 400));
 

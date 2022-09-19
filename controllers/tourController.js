@@ -4,9 +4,13 @@ const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 const moment = require('moment');
 
-exports.getAllTours = factory.getAll(Tour);
+exports.getAllTours = factory.getAll(Tour, {
+  ref: 'guides',
+});
 
-exports.getTour = factory.getOne(Tour);
+exports.getTour = factory.getOne(Tour, {
+  ref: 'guides',
+});
 
 exports.createTour = factory.createOne(Tour);
 
